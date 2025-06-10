@@ -1,117 +1,99 @@
-#On génère un dataset fictif
 import random, csv
 from pathlib import Path
 from faker import Faker
 
-#Paramètres globaux
-N_FREELANCES = 300 #Nombre de freelances à générer
-N_PROSPECTS = 3000 #Nombre de prospects à générer
+# Global parameters
+N_FREELANCES = 300
+N_PROSPECTS = 3000
 
-#Secteurs d'activité
+# Sectors
 SECTORS = [
-    "Tech/SaaS", "Marketing", "Design", "FinTech", "Wellness/Bien-Être",
-    "Retail/E-commerce", "GreenTech", "Éducation/Ed-Tech"
+    "Tech/SaaS", "Marketing", "Design", "FinTech", "Wellness",
+    "Retail/E-commerce", "GreenTech", "Education/Ed-Tech"
 ]
-#Titre du freelance par secteur
+
+# Freelance titles by sector
 TITLE_POOL = {
     "Tech/SaaS": [
-        "Développement logiciel (Python, JavaScript)",
-        "Gestion de produit",
-        "Conception UI/UX",
-        "Analyse de données",
-        "Gestion de cloud (AWS, Azure)"
+        "Software Development",
+        "Product Management",
+        "UI/UX Design",
+        "Data Analysis",
+        "Cloud Management"
     ],
     "Marketing": [
-        "Marketing digital (SEO, SEM)",
-        "Création de contenu",
-        "Analyse de données marketing",
-        "Gestion des réseaux sociaux",
-        "Stratégie de marque"
+        "Digital Marketing",
+        "Content Creation",
+        "Marketing Data Analysis",
+        "Social Media Management",
+        "Brand Strategy"
     ],
     "Design": [
-        "Design graphique (Adobe Creative Suite)",
-        "Conception UI/UX (Figma, Sketch)",
-        "Prototypage",
-        "Direction créative",
-        "Design d’interaction"
+        "Graphic Design",
+        "UI/UX Design",
+        "Prototyping",
+        "Creative Direction",
+        "Interaction Design"
     ],
     "FinTech": [
-        "Développement de systèmes sécurisés",
-        "Analyse financière",
-        "Conformité réglementaire (KYC, AML)",
-        "Expertise blockchain",
-        "Gestion des risques"
+        "Secure System Development",
+        "Financial Analysis",
+        "Regulatory Compliance",
+        "Blockchain Expertise",
+        "Risk Management"
     ],
-    "Wellness/Bien-Être": [
-        "Coaching santé/bien-être",
-        "Création de contenu wellness",
-        "Gestion de communauté",
-        "Marketing digital",
-        "Connaissance en nutrition"
+    "Wellness": [
+        "Health & Wellness Coaching",
+        "Wellness Content Creation",
+        "Community Management",
+        "Digital Marketing",
+        "Nutrition Expertise"
     ],
     "Retail/E-commerce": [
-        "Gestion de plateformes e-commerce (Shopify)",
-        "Marketing digital",
-        "Gestion de la chaîne d’approvisionnement",
-        "Analyse des données de vente",
-        "Service client"
+        "E-commerce Platform Management",
+        "Digital Marketing",
+        "Supply Chain Management",
+        "Sales Data Analysis",
+        "Customer Service"
     ],
     "GreenTech": [
-        "Expertise en énergies renouvelables",
-        "Analyse d’impact environnemental",
-        "Gestion de projets",
-        "Ingénierie durable",
-        "Connaissance des normes ESG"
+        "Renewable Energy Expertise",
+        "Environmental Impact Analysis",
+        "Project Management",
+        "Sustainable Engineering",
+        "ESG Standards Knowledge"
     ],
-    "Éducation/Ed-Tech": [
-        "Conception pédagogique",
-        "Gestion de plateformes LMS",
-        "Développement de contenu e-learning",
-        "Analyse des données éducatives",
-        "Intégration de technologies éducatives"
+    "Education/Ed-Tech": [
+        "Instructional Design",
+        "LMS Platform Management",
+        "E-learning Content Development",
+        "Educational Data Analysis",
+        "Ed-Tech Integration"
     ]
 }
 
-#Compétences par secteur
-SKILLS =  {
-    "Tech/SaaS": [
-        "Python", "Docker", "AWS", "CI/CD", "PostgreSQL", "FastAPI"
-    ],
-    "Marketing": [
-        "SEO", "Google Ads", "Analytics", "Copywriting", "Email Marketing"
-    ],
-    "Design": [
-        "Figma", "User Research", "Prototypage", "AdobeXD", "Design Systems"
-    ],
-    "FinTech": [
-        "SQL", "Risk Modeling", "AML/KYC", "Python", "PowerBI"
-    ],
-    "Wellness/Bien-Être": [
-        "Yoga", "Pilates", "Community Management", "Nutrition", "Copywriting"
-    ],
-    "Retail/E-commerce": [
-        "Shopify", "Facebook Ads", "Supply-Chain", "Data Analytics", "Customer Support"
-    ],
-    "GreenTech": [
-        "LCA", "Carbon Accounting", "IoT", "Energy Modeling", "Project Management"
-    ],
-    "Éducation/Ed-Tech": [
-        "Pedagogy", "Storyline360", "Python", "HTML5", "Learning Analytics"
-    ],
+# Skills by sector
+SKILLS = {
+    "Tech/SaaS": ["Python", "Docker", "AWS", "CI/CD", "PostgreSQL", "FastAPI"],
+    "Marketing": ["SEO", "Google Ads", "Analytics", "Copywriting", "Email Marketing"],
+    "Design": ["Figma", "User Research", "Prototyping", "AdobeXD", "Design Systems"],
+    "FinTech": ["SQL", "Risk Modeling", "AML/KYC", "Python", "PowerBI"],
+    "Wellness": ["Yoga", "Pilates", "Community Management", "Nutrition", "Copywriting"],
+    "Retail/E-commerce": ["Shopify", "Facebook Ads", "Supply-Chain", "Data Analytics", "Customer Support"],
+    "GreenTech": ["LCA", "Carbon Accounting", "IoT", "Energy Modeling", "Project Management"],
+    "Education/Ed-Tech": ["Pedagogy", "Storyline360", "Python", "HTML5", "Learning Analytics"]
 }
 
+# Tone and style options
+TONE_OPTIONS = ["Professional", "Friendly", "Energetic", "Creative", "Serious", "Premium"]
+STYLE_OPTIONS = ["Formal", "Warm", "Storytelling"]
 
-#Listes pour le ton et le style
-TONE_OPTIONS = ["Professionnel", "Bienveillant", "Énergique", "Créatif", "Sérieux", "Premium"]
-STYLE_OPTIONS = ["Formel", "Chaleureux", "Storytelling"]
-
-#Proxies financiers | Taille de société + Stade de financement
-COMPANY_SIZE = ["Startup (1-20)", "PME (21-200", "ETI (201-1000)", "Groupe (1000+)"]
+# Financial proxies
+COMPANY_SIZE = ["Startup (1-20)", "SME (21-200)", "Mid-size (201-1000)", "Enterprise (1000+)"]
 FUNDING_STAGES = ["Pre-Seed", "Seed", "Series A", "Series B", "Series C+"]
 
-def ticket_size_class(size:str, stage:str):
-    #Retourne Low / Medium / High selon la capacité de l'entreprise
-    if size.startswith("Groupe") or stage in ["Series B", "Series C+"]:
+def ticket_size_class(size: str, stage: str):
+    if size.startswith("Enterprise") or stage in ["Series B", "Series C+"]:
         return "High"
     elif size.startswith("Startup") and stage in ["Pre-Seed", "Seed"]:
         return "Low"
@@ -119,23 +101,21 @@ def ticket_size_class(size:str, stage:str):
         return "Medium"
 
 
+
 def main():
-    #Génère les 2 CSV dans le dossier "data"
-    #On instancie Faker en français + seeds pour la reproductibilité
-    fake = Faker("fr_FR")
+    fake = Faker("en_US")
     Faker.seed(42)
     random.seed(42)
 
-    #Je créé le dossier data
     Path("generate_datasets").mkdir(exist_ok=True)
 
-#Génération des freelances
+    # Freelance dataset
     with open("generate_datasets/freelances_dataset.csv", "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
         writer.writerow([
-            "freelance_id", "nom", "titre", "secteur_principal",
-            "skills_top3", "ville", "tjm", "mission_statement",
-            "tonalite_preferee", "style_prefere"
+            "freelance_id", "name", "title", "main_sector",
+            "top3_skills", "city", "daily_rate", "mission_statement",
+            "preferred_tone", "preferred_style", "remote"
         ])
         for fid in range(1, N_FREELANCES + 1):
             sec = random.choice(SECTORS)
@@ -149,22 +129,22 @@ def main():
                 round(random.uniform(300, 1000), 2),
                 fake.catch_phrase(),
                 random.choice(TONE_OPTIONS),
-                random.choice(STYLE_OPTIONS)
+                random.choice(STYLE_OPTIONS),
+                random.choice(["Yes", "No"])
             ])
 
-#Générer des prospects
-
+    # Prospect dataset
     with open("generate_datasets/prospects_dataset.csv", "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
         writer.writerow([
-            "prospect_id", "societe", "secteur", "contact_principal",
-            "role_contact", "ville", "mission_statement",
+            "prospect_id", "company", "sector", "main_contact",
+            "contact_role", "city", "mission_statement",
             "company_size", "funding_stage", "ticket_size_class",
-            "tonalite_cible"
+            "target_tone", "remote"
         ])
         for pid in range(1, N_PROSPECTS + 1):
-            sec   = random.choice(SECTORS)
-            size  = random.choice(COMPANY_SIZE)
+            sec = random.choice(SECTORS)
+            size = random.choice(COMPANY_SIZE)
             stage = random.choice(FUNDING_STAGES)
             writer.writerow([
                 pid,
@@ -177,10 +157,11 @@ def main():
                 size,
                 stage,
                 ticket_size_class(size, stage),
-                random.choice(TONE_OPTIONS)
+                random.choice(TONE_OPTIONS),
+                random.choice(["Yes", "No"])
             ])
 
-        print("✅  CSV générés dans le dossier /data")
+        print("✅  CSVs generated in /generate_datasets")
 
 if __name__ == "__main__":
     main()
