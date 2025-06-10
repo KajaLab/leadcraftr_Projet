@@ -10,10 +10,10 @@ def update_freelance_mission_statements():
     Met à jour les mission statements des freelances
     """
     def generate_mission_statement(row):
-        sector = row['secteur_principal']
-        skills = row['skills_top3'].split('|')[:2]  # Use first two skills for brevity
-        name = row['nom']
-        tone = row['tonalite_preferee']
+        sector = row['main_sector']
+        skills = row['top3_skills'].split('|')[:2]  # Use first two skills for brevity
+        name = row['name']
+        tone = row['preferred_tone']
 
         # Tone-specific adjectives
         tone_adjectives = {
@@ -98,7 +98,8 @@ def update_freelance_mission_statements():
         reader = csv.DictReader(csvfile)
 
         # Validate only essential columns for mission generation
-        essential_columns = {'nom', 'secteur_principal', 'skills_top3', 'tonalite_preferee'}
+        essential_columns = {'name', 'main_sector', 'top3_skills', 'preferred_tone'}
+#{'freelance_id', 'name', 'title', 'main_sector', 'top3_skills','city', 'daily_rate', 'mission_statement', 'preferred_tone', 'preferred_style', 'remote'}'
         if not essential_columns.issubset(reader.fieldnames):
             missing = essential_columns - set(reader.fieldnames)
             raise ValueError(f"Missing essential columns for mission generation: {missing}")
@@ -193,10 +194,10 @@ def update_prospect_mission_statements():
     }
 
     def generate_mission(row):
-        sector = row["secteur"]
+        sector = row["sector"]
         company_size = row["company_size"].split()[0].lower()
-        tone = row["tonalite_cible"]
-        role = row["role_contact"]
+        tone = row["target_tone"]
+        role = row["contact_role"]
 
         # Select random template
         template = random.choice(templates.get(sector, templates["FinTech"]))
