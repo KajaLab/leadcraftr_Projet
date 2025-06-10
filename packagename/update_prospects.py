@@ -55,35 +55,28 @@ def update_mission_statement_prospects():
     }
 
     def generate_mission(row):
-        sector = row["secteur"]
+        sector = row["sector"]
         company_size = row["company_size"].split()[0].lower()
-        tone = row["tonalite_cible"]
-        role = row["role_contact"]
+        tone = row["target_tone"]
+        role = row["contact_role"]
 
-        # Select random template
         template = random.choice(templates.get(sector, templates["FinTech"]))
-
-        # Select adjective based on tone
         adjective = random.choice(adjectives.get(tone, ["effective"]))
-
-        # Select action and focus
         action = random.choice(actions)
         focus = random.choice(focuses)
 
-        # Adjust focus based on role
+        # Role-specific adjustment
         if role == "Head of Data":
-            focus = "data analytics" if "data" not in focus else focus
+            focus = "data analytics"
         elif role == "CTO":
-            focus = "cutting-edge technology" if "tech" not in focus else focus
+            focus = "cutting-edge technology"
         elif role == "Head of Marketing":
-            focus = "customer engagement" if "engage" not in focus else focus
+            focus = "customer engagement"
         elif role == "CEO":
-            action = random.choice(["drive", "pioneer", "transform"])  # Visionary actions
+            action = random.choice(["drive", "pioneer", "transform"])
 
-        # Generate mission statement
         mission = template.format(adjective=adjective, action=action, focus=focus, company_size=company_size)
 
-        # Ensure 30–40 words
         words = mission.split()
         if len(words) > 40:
             mission = " ".join(words[:40]) + "."
@@ -93,21 +86,12 @@ def update_mission_statement_prospects():
         return mission
 
     # Generate mission statements
-    mission_dict = {str(row["prospect_id"]): generate_mission(row) for _, row in df.iterrows()}
+    df["mission_statement"] = df.apply(generate_mission, axis=1)
 
-    # # Save to JSON
+    # Save mission statements to JSON
+    mission_dict = dict(zip(df["prospect_id"].astype(str), df["mission_statement"]))
     with open("generate_datasets/prospects_mission_statements.json", "w", encoding="utf-8") as f:
         json.dump(mission_dict, f, ensure_ascii=False, indent=2)
-
-    # Load original CSV
-    df = pd.read_csv("generate_datasets/prospects_dataset.csv")
-
-    # Load JSON with new mission statements
-    with open("generate_datasets/prospects_mission_statements.json", "r") as f:
-        mission_data = json.load(f)
-
-    # Update mission_statement column based on prospect_id
-    df["mission_statement"] = df["prospect_id"].astype(str).map(mission_data)
 
     # Save updated CSV
     df.to_csv("generate_datasets/updated_prospects_dataset.csv", index=False, encoding="utf-8")
