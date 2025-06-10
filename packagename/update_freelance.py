@@ -5,10 +5,10 @@ import os
 
 # Function to generate a tailored mission statement in English
 def generate_mission_statement(row):
-    sector = row['secteur_principal']
-    skills = row['skills_top3'].split('|')[:2]  # Use first two skills for brevity
-    name = row['nom']
-    tone = row['tonalite_preferee']
+    sector = row['main_sector']
+    skills = row['top3_skills'].split('|')[:2]  # Use first two skills for brevity
+    name = row['name']
+    tone = row['preferred_tone']
 
     # Tone-specific adjectives
     tone_adjectives = {
@@ -92,7 +92,7 @@ if not os.path.exists(input_file):
 with open(input_file, newline='', encoding='utf-8') as csvfile:
     reader = csv.DictReader(csvfile)
     # Validate required columns
-    required_columns = {'freelance_id', 'nom', 'titre', 'secteur_principal', 'skills_top3', 'ville', 'tjm', 'tonalite_preferee', 'style_prefere'}
+    required_columns = {'freelance_id', 'name', 'title', 'main_sector', 'top3_skills','city', 'daily_rate', 'mission_statement', 'preferred_tone', 'preferred_style', 'remote'}
     if not required_columns.issubset(reader.fieldnames):
         missing = required_columns - set(reader.fieldnames)
         raise ValueError(f"Missing required columns: {missing}")
@@ -101,16 +101,16 @@ with open(input_file, newline='', encoding='utf-8') as csvfile:
         new_mission = generate_mission_statement(row)
         freelancers.append({
             'freelance_id': row['freelance_id'],
-            'nom': row['nom'],
-            'titre': row['titre'],
-            'secteur_principal': row['secteur_principal'],
-            'skills_top3': row['skills_top3'],
-            'ville': row['ville'],
-            'tjm': row['tjm'],
+            'nom': row['name'],
+            'titre': row['title'],
+            'secteur_principal': row['main_sector'],
+            'skills_top3': row['top3_skills'],
+            'ville': row['city'],
+            'tjm': row['daily_rate'],
             'mission_statement': new_mission,
-            'tonalite_preferee': row['tonalite_preferee'],
-            'style_prefere': row['style_prefere']
-        })
+            'tonalite_preferee': row['preferred_tone'],
+            'style_prefere': row['preferred_style']
+})
 
 # Write to JSON file
 with open(output_json, 'w', encoding='utf-8') as jsonfile:
