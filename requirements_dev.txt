@@ -33,3 +33,7 @@ traitlets==5.5.0
 #Data
 faker
 scikit-learn
+
+# testing
+streamlit
+requests
