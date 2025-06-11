@@ -5,43 +5,75 @@ import time
 from langchain.chat_models import init_chat_model
 
 
-def mail_generator(freelance, top_20_df):
+def mail_generator(freelance, prospect):
+    """
+    Génère un email de prospection personnalisé en anglais à partir des données d’un freelance et d’une entreprise cible.
+
+    Paramètres :
+    -----------
+    freelance : dict
+        Dictionnaire contenant les informations du freelance :
+        - 'name' : Nom complet
+        - 'title' : Titre ou métier
+        - 'main_sector' : Secteur principal d’activité
+        - 'city' : Ville
+        - 'top3_skills' : Compétences clés (format texte)
+        - 'daily_rate' : Tarif journalier
+        - 'remote' : "Yes"/"No"
+        - 'mission_statement' : Résumé de la proposition de valeur
+        - 'preferred_tone' : Ton préféré (ex. : Professional)
+        - 'preferred_style' : Style préféré (ex. : Storytelling)
+
+    prospect : pandas.Series ou dict
+        Informations sur l’entreprise cible :
+        - 'company' : Nom de l’entreprise
+        - 'city' : Ville
+        - 'sector' : Secteur d’activité
+        - 'main_contact' : Nom du contact principal
+        - 'contact_role' : Poste du contact
+        - 'company_size' : Taille de l’entreprise
+        - 'funding_stage' : Stade de financement
+        - 'remote' : "Yes"/"No"
+        - 'target_tone' : Ton attendu côté entreprise
+
+    Retour :
+    --------
+    prospect : pandas.Series ou dict
+        Le même objet que `prospect` mais avec un champ supplémentaire 'mail' contenant l’email généré.
+    """
+
     model = init_chat_model("gemini-2.0-flash", model_provider="google_genai")
+    prospect = prospect.copy()
 
-    top_20_df['mail'] = ''
-    top_20_df = top_20_df.reset_index(drop=True)
+    prompt = f"""
+    Write a clear, professional, and personalized cold email in English, addressed to {prospect['main_contact']} ({prospect['contact_role']})
+    from the company {prospect['company']}, based in {prospect['city']} and operating in the {prospect['sector']} sector.
 
-    for prospect_id in range(len(top_20_df)):
-        # Pause de 60s toutes les 10 requêtes
-        if prospect_id > 0 and prospect_id % 10 == 0:
-            print("Waiting 30 seconds to respect rate limits...")
-            time.sleep(30)
+    You are {freelance['name']}, a {freelance['title']} based in {freelance['city']}, specialized in the {freelance['main_sector']} sector.
+    You provide services with expertise in {freelance['top3_skills']}, at a daily rate of {freelance['daily_rate']} EUR (remote: {freelance['remote']}).
+    Your mission is: {freelance['mission_statement']}
 
-        prospect = top_20_df.iloc[prospect_id]
+    The company is a {prospect['company_size']} at the {prospect['funding_stage']} stage, and remote work availability is {prospect['remote']}.
 
-        prompt = f"""
-        Write a concise and professional cold email in English to offer your mission: {freelance['mission_statement']}
-        to a company called {prospect['company']} based in {prospect['city']}, operating in the {prospect['sector']} sector.
-        Your contact is {prospect['main_contact']}, who is the {prospect['contact_role']}.
+    The email should:
+    - Open with a brief and relevant introduction.
+    - Present the value you can bring to this company in 2–3 concise sentences.
+    - Match the company's tone: {prospect['target_tone']}, while reflecting your preferred tone: {freelance['preferred_tone']} and style: {freelance['preferred_style']}.
+    - Be business-oriented and adapted to the company's context.
+    - End with a clear, actionable closing (e.g., propose a short call or ask for availability).
+    - Sign with your name
+    Ensure the language is polite, direct, and free from repetition or generic phrases. Avoid using placeholders or uncertain formulations.
+    Return only the body of the email (no subject line or explanation).
+    """
 
-        You are {freelance['name']}, a {freelance['title']} specialized in the {freelance['main_sector']} sector,
-        based in {freelance['city']}. You offer services with top skills in {freelance['top3_skills']},
-        at a daily rate of {freelance['daily_rate']} (remote: {freelance['remote']}).
+    try:
+        response = model.invoke(prompt)
+        content = response.content if hasattr(response, "content") else str(response)
+    except Exception as e:
+        print(f"Error : {e}")
+        content = f"ERROR: {e}"
 
-        Highlight your main value proposition in 2–3 sentences, adapted to the needs of a company like {prospect['company']}
-        (size: {prospect['company_size']}, funding stage: {prospect['funding_stage']}, remote work: {prospect['remote']}).
+    prospect['mail'] = response.__dict__['content']
 
-        Include a clear call to action. Keep the tone {freelance['preferred_tone']} and the style {freelance['preferred_style']},
-        while matching the company’s target tone: {prospect['target_tone']}.
-        """
+    return prospect
 
-        try:
-            response = model.invoke(prompt)
-            content = response.content if hasattr(response, "content") else str(response)
-        except Exception as e:
-            print(f"Error at index {prospect_id}: {e}")
-            content = f"ERROR: {e}"
-
-        top_20_df.at[prospect_id, 'mail'] = content
-
-    return top_20_df
