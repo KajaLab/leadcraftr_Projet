@@ -30,9 +30,15 @@ notebook==6.4.12
 notebook_shim==0.2.0
 traitlets==5.5.0
 
-#Data
+# data
 faker
+
+# matching
 scikit-learn
+
+# mail generating
+langchain
+langchain-google-genai
 
 # testing
 streamlit
