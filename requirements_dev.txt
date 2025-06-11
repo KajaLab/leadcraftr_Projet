@@ -43,3 +43,9 @@ langchain-google-genai
 # testing
 streamlit
 requests
+
+# Connexion avec la data du GCP
+google-cloud-bigquery
+db-dtypes
+pandas
+pyarrow
