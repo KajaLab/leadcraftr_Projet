@@ -48,7 +48,9 @@ requests
 nltk
 
 # Connexion avec la data du GCP
+google-cloud-storage
 google-cloud-bigquery
 db-dtypes
 pandas
 pyarrow
+pyyaml
