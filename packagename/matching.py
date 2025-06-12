@@ -1,6 +1,7 @@
 # Imports
 import pandas as pd
 import numpy as np
+from packagename.preprocessing import cleaning
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from scipy.sparse import vstack
@@ -12,8 +13,8 @@ def vectorize_missions_dataset(freelance_df, prospect_df):
     """
     # Copie des textes bruts
     all_missions = pd.concat([
-        freelance_df["mission_statement"],
-        prospect_df["mission_statement"]
+        freelance_df["TfidfVect"],
+        prospect_df["TfidfVect"]
     ])
 
     vectorizer = TfidfVectorizer(stop_words='english')
@@ -23,8 +24,8 @@ def vectorize_missions_dataset(freelance_df, prospect_df):
     freelance_df = freelance_df.copy()
     prospect_df = prospect_df.copy()
 
-    freelance_df["tfidf_vector"] = list(vectorizer.transform(freelance_df["mission_statement"]))
-    prospect_df["tfidf_vector"] = list(vectorizer.transform(prospect_df["mission_statement"]))
+    freelance_df["tfidf_vector"] = list(vectorizer.transform(freelance_df["TfidfVect"]))
+    prospect_df["tfidf_vector"] = list(vectorizer.transform(prospect_df["TfidfVect"]))
     return freelance_df, prospect_df, vectorizer
 
 
@@ -34,8 +35,6 @@ def get_top_20_leads(freelance_vec, prospect_df):
     Retourne les 20 prospects les plus proches du vecteur freelance donné.
     """
     prospect_matrix = vstack(prospect_df["tfidf_vector"].values)
-
     similarities = cosine_similarity(freelance_vec, prospect_matrix).flatten()
     top_20_idx = similarities.argsort()[-20:][::-1]
-
     return prospect_df.iloc[top_20_idx].assign(similarity=similarities[top_20_idx])
