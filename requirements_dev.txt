@@ -43,3 +43,6 @@ langchain-google-genai
 # testing
 streamlit
 requests
+
+# preprocessing
+nltk
