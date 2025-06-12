@@ -33,6 +33,7 @@ def match(mission_statement: str = Query(..., min_length=10)):
     )
 
     # Vectoriser l'entrée
+    mission_statement = cleaning(mission_statement)
     vec = vectorizer.transform([mission_statement])
 
     # Obtenir top 20
