@@ -6,7 +6,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 from scipy.sparse import vstack
 
 
-def vectorize_missions(freelance_df, prospect_df):
+def vectorize_missions_dataset(freelance_df, prospect_df):
     """
     Vectorise les mission statements avec TF-IDF et stocke les vecteurs dans la colonne 'tfidf_vector'.
     """
@@ -26,6 +26,7 @@ def vectorize_missions(freelance_df, prospect_df):
     freelance_df["tfidf_vector"] = list(vectorizer.transform(freelance_df["mission_statement"]))
     prospect_df["tfidf_vector"] = list(vectorizer.transform(prospect_df["mission_statement"]))
     return freelance_df, prospect_df, vectorizer
+
 
 
 def get_top_20_leads(freelance_vec, prospect_df):
