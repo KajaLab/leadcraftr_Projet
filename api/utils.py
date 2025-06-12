@@ -8,7 +8,6 @@ import joblib
 from google.cloud import storage, bigquery
 import tempfile
 import string
-import nltk
 from nltk.stem import WordNetLemmatizer
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
