@@ -2,7 +2,7 @@ import streamlit as st
 import requests
 
 # UI setup
-st.set_page_config(page_title="LEADCRAFT® | Freelance Matching", layout="centered")
+st.set_page_config(page_title="LeadCraft(r) | Freelance Matching", layout="centered")
 
 # Theme and Header
 st.markdown("""
@@ -17,14 +17,16 @@ st.markdown("""
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
             font-size: 15px;
             color: #1c1c1c;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         b {
             font-size: 16px;
             color: #0d47a1;
         }
         a.email-link {
-            display: inline-block;
-            margin-top: 8px;
+            margin-left: 20px;
             padding: 6px 12px;
             background-color: #0d47a1;
             color: white;
@@ -91,9 +93,13 @@ if user_type == "A Company looking for a Freelancer":
                 st.markdown(
                     f"""
                     <div>
-                        <b>{match['name']}</b> | {', '.join(match['skills'])}<br>
-                        💰 <b>{match['tjm']}€/day</b> | 🏆 {match['experience']}y exp | 📍 {match['location']} | {match['work_mode']}<br>
-                        <a class='email-link' href='mailto:{match['email']}?subject=Freelance%20Opportunity&body=Hello%20{match['name']},%20test%20contenu%20du%20mail' target='_blank'>📧 Generate Email</a>
+                        <div>
+                            <div>
+                                <b>{match['name']}</b> | {', '.join(match['skills'])}<br>
+                                💰 <b>{match['tjm']}€/day</b> | 🏆 {match['experience']}y exp | 📍 {match['location']} | {match['work_mode']}
+                            </div>
+                            <a class='email-link' href='mailto:{match['email']}?subject=Freelance%20Opportunity&body=Hello%20{match['name']},%20test%20contenu%20du%20mail' target='_blank'>📧 Generate Email</a>
+                        </div>
                     </div>
                     """, unsafe_allow_html=True)
         else:
@@ -135,9 +141,13 @@ elif user_type == "A Freelancer looking for a Company":
                 st.markdown(
                     f"""
                     <div>
-                        <b>{match['company']}</b> | {match['industry']}<br>
-                        💰 <b>{match['budget']}€/day</b> | 🏢 {match['size']} | 📍 {match['location']} | {match['work_mode']}<br>
-                        <a class='email-link' href='mailto:{match['email']}?subject=Freelance%20Collaboration&body=Hello,%20test%20contenu%20du%20mail' target='_blank'>📧 Generate Email</a>
+                        <div>
+                            <div>
+                                <b>{match['company']}</b> | {match['industry']}<br>
+                                💰 <b>{match['budget']}€/day</b> | 🏢 {match['size']} | 📍 {match['location']} | {match['work_mode']}
+                            </div>
+                            <a class='email-link' href='mailto:{match['email']}?subject=Freelance%20Collaboration&body=Hello,%20test%20contenu%20du%20mail' target='_blank'>📧 Generate Email</a>
+                        </div>
                     </div>
                     """, unsafe_allow_html=True)
         else:

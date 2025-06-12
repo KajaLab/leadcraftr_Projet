@@ -6,26 +6,38 @@ from scipy.sparse import vstack
 import pandas as pd
 import joblib
 from google.cloud import storage, bigquery
+from google.oauth2 import service_account
 import tempfile
 import string
 from nltk.stem import WordNetLemmatizer
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from nltk import pos_tag
+from .config import config
+
+def get_bq_client():
+    credentials = service_account.Credentials.from_service_account_file(
+        "/home/yahyaad/code/KajaLab/leadcraftr_Projet/notebooks/bigquery-sa-key.json"
+    )
+    return bigquery.Client(project=PROJECT_ID, credentials=credentials)
+
 
 # Loading
 def load_vectorizer():
-    storage_client = storage.Client(project=PROJECT_ID)
-    bucket = storage_client.bucket(BUCKET_NAME)
-    blob = bucket.blob(VECTORIZER_BLOB)
+    credentials = service_account.Credentials.from_service_account_file(config["CREDENTIALS_PATH"])
+    storage_client = storage.Client(project=config["PROJECT_ID"], credentials=credentials)
+    bucket = storage_client.bucket(config["BUCKET_NAME"])
+    blob = bucket.blob(config["VECTORIZER_BLOB"])
 
-    with tempfile.NamedTemporaryFile() as tmp_file:
+    with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
         blob.download_to_filename(tmp_file.name)
-        return joblib.load(tmp_file.name)
+        vectorizer = joblib.load(tmp_file.name)
+
+    return vectorizer
 
 def load_prospect_data():
-    client = bigquery.Client(project=PROJECT_ID)
-    query = f"SELECT * FROM `{PROJECT_ID}.{DATASET_ID}.{TABLE_NAME}`"
+    client = get_bq_client()
+    query = f"SELECT * FROM `{PROJECT_ID}.{DATASET_ID}.{TABLE_NAME}` WHERE mission_statement IS NOT NULL"
     return client.query(query).to_dataframe()
 
 # Preprocessing
