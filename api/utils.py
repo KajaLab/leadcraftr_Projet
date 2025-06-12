@@ -1,46 +1,34 @@
-# Imports
-import pandas as pd
-import numpy as np
 from langchain.chat_models import init_chat_model
+from typing import List
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+from scipy.sparse import vstack
+import pandas as pd
+import joblib
+from google.cloud import storage, bigquery
+import tempfile
 
+def load_vectorizer():
+    storage_client = storage.Client(project=PROJECT_ID)
+    bucket = storage_client.bucket(BUCKET_NAME)
+    blob = bucket.blob(VECTORIZER_BLOB)
 
-def mail_generator(freelance, prospect):
-    """
-    Génère un email de prospection personnalisé en anglais à partir des données d’un freelance et d’une entreprise cible.
+    with tempfile.NamedTemporaryFile() as tmp_file:
+        blob.download_to_filename(tmp_file.name)
+        return joblib.load(tmp_file.name)
 
-    Paramètres :
-    -----------
-    freelance : dict
-        Dictionnaire contenant les informations du freelance :
-        - 'name' : Nom complet
-        - 'title' : Titre ou métier
-        - 'main_sector' : Secteur principal d’activité
-        - 'city' : Ville
-        - 'top3_skills' : Compétences clés (format texte)
-        - 'daily_rate' : Tarif journalier
-        - 'remote' : "Yes"/"No"
-        - 'mission_statement' : Résumé de la proposition de valeur
-        - 'preferred_tone' : Ton préféré (ex. : Professional)
-        - 'preferred_style' : Style préféré (ex. : Storytelling)
+def load_prospect_data():
+    client = bigquery.Client(project=PROJECT_ID)
+    query = f"SELECT * FROM `{PROJECT_ID}.{DATASET_ID}.{TABLE_NAME}`"
+    return client.query(query).to_dataframe()
 
-    prospect : pandas.Series ou dict
-        Informations sur l’entreprise cible :
-        - 'company' : Nom de l’entreprise
-        - 'city' : Ville
-        - 'sector' : Secteur d’activité
-        - 'main_contact' : Nom du contact principal
-        - 'contact_role' : Poste du contact
-        - 'company_size' : Taille de l’entreprise
-        - 'funding_stage' : Stade de financement
-        - 'remote' : "Yes"/"No"
-        - 'target_tone' : Ton attendu côté entreprise
+def get_top_20_leads(freelance_vec, prospect_df):
+    prospect_matrix = vstack([v for v in prospect_df["tfidf_vector"]])
+    similarities = cosine_similarity(freelance_vec, prospect_matrix).flatten()
+    top_20_idx = similarities.argsort()[-20:][::-1]
+    return prospect_df.iloc[top_20_idx].assign(similarity=similarities[top_20_idx])
 
-    Retour :
-    --------
-    prospect : pandas.Series ou dict
-        Le même objet que `prospect` mais avec un champ supplémentaire 'mail' contenant l’email généré.
-    """
-
+def mail_generator(freelance: dict, prospect: dict) -> dict:
     model = init_chat_model("gemini-2.0-flash", model_provider="google_genai")
     prospect = prospect.copy()
 
@@ -64,7 +52,6 @@ def mail_generator(freelance, prospect):
     Ensure the language is polite, direct, and free from repetition or generic phrases. Avoid using placeholders or uncertain formulations.
     Return only the body of the email (no subject line or explanation).
     """
-
     try:
         response = model.invoke(prompt)
         content = response.content if hasattr(response, "content") else str(response)
@@ -72,6 +59,5 @@ def mail_generator(freelance, prospect):
         print(f"Error : {e}")
         content = f"ERROR: {e}"
 
-    prospect['mail'] = response.__dict__['content']
-
-    return prospect
+    prospect['mail'] = content
+    return content

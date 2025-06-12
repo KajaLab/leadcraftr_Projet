@@ -2,15 +2,15 @@ import streamlit as st
 import requests
 
 # UI setup
-st.set_page_config(page_title="LeadCraftr | Freelance Matching", layout="centered")
+st.set_page_config(page_title="LEADCRAFT® | Freelance Matching", layout="centered")
 
 # Theme and Header
 st.markdown("""
     <style>
-        .main { background-color: #f7fafd; }
-        .css-1d391kg, .css-1cpxqw2 { background: #eef6fb !important; }
+        .main { background-color: #ffffff; }
+        .css-1d391kg, .css-1cpxqw2 { background: #f5f7fa !important; }
         div[role="listitem"] div {
-            background: #ffffff;
+            background: #f9fbfc;
             border-radius: 12px;
             padding: 16px 20px;
             margin: 10px 0;
@@ -22,15 +22,27 @@ st.markdown("""
             font-size: 16px;
             color: #0d47a1;
         }
+        a.email-link {
+            display: inline-block;
+            margin-top: 8px;
+            padding: 6px 12px;
+            background-color: #0d47a1;
+            color: white;
+            border-radius: 6px;
+            text-decoration: none;
+        }
+        a.email-link:hover {
+            background-color: #093170;
+        }
     </style>
 """, unsafe_allow_html=True)
 
-st.title("LEADCRAFTR")
+st.title("LEADCRAFT®")
 st.markdown("### 🤝 Match Freelancers & Companies")
 st.write("Connect top freelancers with companies. Start by selecting your profile:")
 
-# Profile selection
-user_type = st.radio("You are:", ("A Company looking for a Freelancer", "A Freelancer looking for a Company"))
+# Profile selection (default to Freelancer)
+user_type = st.radio("You are:", ("A Freelancer looking for a Company", "A Company looking for a Freelancer"))
 
 st.markdown("---")
 
@@ -67,11 +79,10 @@ if user_type == "A Company looking for a Freelancer":
             'skills': ",".join(skills),
             'experience': experience,
         }
-        # Example mocked response:
         response = {
             "matches": [
-                {"name": "Alice", "skills": ["Python", "Data Science"], "tjm": 600, "experience": 5, "location": "Europe", "work_mode": "Remote"},
-                {"name": "Bob", "skills": ["Web Development"], "tjm": 450, "experience": 7, "location": "Remote", "work_mode": "Hybrid"},
+                {"name": "Alice", "skills": ["Python", "Data Science"], "tjm": 600, "experience": 5, "location": "Europe", "work_mode": "Remote", "email": "alice.freelance@example.com"},
+                {"name": "Bob", "skills": ["Web Development"], "tjm": 450, "experience": 7, "location": "Remote", "work_mode": "Hybrid", "email": "bob.dev@example.com"},
             ]
         }
         if response and response["matches"]:
@@ -81,7 +92,8 @@ if user_type == "A Company looking for a Freelancer":
                     f"""
                     <div>
                         <b>{match['name']}</b> | {', '.join(match['skills'])}<br>
-                        💰 <b>{match['tjm']}€/day</b> | 🏆 {match['experience']}y exp | 📍 {match['location']} | {match['work_mode']}
+                        💰 <b>{match['tjm']}€/day</b> | 🏆 {match['experience']}y exp | 📍 {match['location']} | {match['work_mode']}<br>
+                        <a class='email-link' href='mailto:{match['email']}?subject=Freelance%20Opportunity&body=Hello%20{match['name']},%20test%20contenu%20du%20mail' target='_blank'>📧 Generate Email</a>
                     </div>
                     """, unsafe_allow_html=True)
         else:
@@ -90,6 +102,8 @@ if user_type == "A Company looking for a Freelancer":
 elif user_type == "A Freelancer looking for a Company":
     st.subheader("🔍 Freelancer Search Form")
     freelancer_name = st.text_input("Your Name", max_chars=40)
+    job_title = st.text_input("Desired Job Title", max_chars=60)
+    mission_statement = st.text_area("Personal Statement", max_chars=300)
     experience = st.slider('Your Experience (years)', min_value=0, max_value=20, value=3)
     tjm = st.slider('Your Day Rate (TJM, €)', min_value=100, max_value=2000, value=500, step=50)
     skills = st.multiselect('Your Skills (max 3)', skills_options, max_selections=3)
@@ -102,16 +116,17 @@ elif user_type == "A Freelancer looking for a Company":
             'freelancer_name': freelancer_name,
             'experience': experience,
             'tjm': tjm,
+            'job_title': job_title,
+            'mission_statement': mission_statement,
             'skills': ",".join(skills),
             'preferred_company_size': preferred_company_size,
             'location': location,
             'work_mode': work_mode,
         }
-        # Example mocked response:
         response = {
             "matches": [
-                {"company": "Acme Corp", "industry": "Tech", "budget": 800, "location": "Europe", "size": "SME", "work_mode": "Remote"},
-                {"company": "Beta Startup", "industry": "Marketing", "budget": 500, "location": "Remote", "size": "Startup", "work_mode": "Hybrid"},
+                {"company": "Acme Corp", "industry": "Tech", "budget": 800, "location": "Europe", "size": "SME", "work_mode": "Remote", "email": "hr@acme.com"},
+                {"company": "Beta Startup", "industry": "Marketing", "budget": 500, "location": "Remote", "size": "Startup", "work_mode": "Hybrid", "email": "jobs@betastartup.com"},
             ]
         }
         if response and response["matches"]:
@@ -121,7 +136,8 @@ elif user_type == "A Freelancer looking for a Company":
                     f"""
                     <div>
                         <b>{match['company']}</b> | {match['industry']}<br>
-                        💰 <b>{match['budget']}€/day</b> | 🏢 {match['size']} | 📍 {match['location']} | {match['work_mode']}
+                        💰 <b>{match['budget']}€/day</b> | 🏢 {match['size']} | 📍 {match['location']} | {match['work_mode']}<br>
+                        <a class='email-link' href='mailto:{match['email']}?subject=Freelance%20Collaboration&body=Hello,%20test%20contenu%20du%20mail' target='_blank'>📧 Generate Email</a>
                     </div>
                     """, unsafe_allow_html=True)
         else:

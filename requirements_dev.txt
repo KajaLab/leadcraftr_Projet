@@ -46,3 +46,9 @@ requests
 
 # preprocessing
 nltk
+
+# Connexion avec la data du GCP
+google-cloud-bigquery
+db-dtypes
+pandas
+pyarrow
