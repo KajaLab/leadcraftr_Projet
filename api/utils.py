@@ -73,7 +73,7 @@ def get_top_20_leads(freelance_vec, prospect_df):
     return prospect_df.iloc[top_20_idx].assign(similarity=similarities[top_20_idx])
 
 # Mail
-def mail_generator(freelance: dict, prospect: dict) -> dict:
+def basic_mail_generator(freelance, prospect):
     model = init_chat_model("gemini-2.0-flash", model_provider="google_genai")
     prospect = prospect.copy()
 
@@ -90,13 +90,13 @@ def mail_generator(freelance: dict, prospect: dict) -> dict:
     The email should:
     - Open with a brief and relevant introduction.
     - Present the value you can bring to this company in 2–3 concise sentences.
-    - Match the company's tone: {prospect['target_tone']}, while reflecting your preferred tone: {freelance['preferred_tone']} and style: {freelance['preferred_style']}.
     - Be business-oriented and adapted to the company's context.
     - End with a clear, actionable closing (e.g., propose a short call or ask for availability).
-    - Sign with your name
+    - "Sign the email with your name.
     Ensure the language is polite, direct, and free from repetition or generic phrases. Avoid using placeholders or uncertain formulations.
-    Return only the body of the email ready to be sent (no subject line or explanation).
+    Return only the body of the email (no subject line or explanation).
     """
+
     try:
         response = model.invoke(prompt)
         content = response.content if hasattr(response, "content") else str(response)
@@ -104,5 +104,35 @@ def mail_generator(freelance: dict, prospect: dict) -> dict:
         print(f"Error : {e}")
         content = f"ERROR: {e}"
 
-    prospect['mail'] = content
+    content = response.__dict__['content']
+
+    return content
+
+def mail_generator(freelance, prospect, basic_mail_content):
+    model = init_chat_model("gemini-2.0-flash", model_provider="google_genai")
+    prospect = prospect.copy()
+
+    prompt = f"""
+    Based on the content below, rewrite the email to better match the desired tone and style:
+    {basic_mail_content}
+    The email should:
+    - Open with a brief and relevant introduction.
+    - Present the value you can bring to this company in 2–3 concise sentences.
+    - Match the company's tone: {prospect['target_tone']}, while reflecting your preferred tone: {freelance['preferred_tone']} and style: {freelance['preferred_style']}.
+    - Be business-oriented and adapted to the company's context.
+    - End with a clear, actionable closing (e.g., propose a short call or ask for availability).
+    - "Sign the email with your name.
+    Ensure the language is polite, direct, and free from repetition or generic phrases. Avoid using placeholders or uncertain formulations.
+    Return only the body of the email (no subject line or explanation).
+    """
+
+    try:
+        response = model.invoke(prompt)
+        content = response.content if hasattr(response, "content") else str(response)
+    except Exception as e:
+        print(f"Error : {e}")
+        content = f"ERROR: {e}"
+
+    content = response.__dict__['content']
+
     return content
