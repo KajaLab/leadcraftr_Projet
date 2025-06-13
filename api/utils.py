@@ -14,20 +14,34 @@ from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from nltk import pos_tag
 from .config import config
+import os
+import nltk
+
+
+os.environ['NLTK_DATA'] = 'nltk_data'
+
+# Config
+CREDENTIALS_PATH = config["CREDENTIALS_PATH"]
+PROJECT_ID = config["PROJECT_ID"]
+DATASET_ID = config["DATASET_ID"]
+TABLE_NAME = config["TABLE_NAME"]
+BUCKET_NAME = config["BUCKET_NAME"]
+VECTORIZER_BLOB = config["VECTORIZER_BLOB"]
+
+# Credentials pour GCP (vectorizer / BigQuery uniquement)
+def get_credentials():
+    from google.oauth2 import service_account
+    return service_account.Credentials.from_service_account_file(CREDENTIALS_PATH)
 
 def get_bq_client():
-    credentials = service_account.Credentials.from_service_account_file(
-        "/home/yahyaad/code/KajaLab/leadcraftr_Projet/notebooks/bigquery-sa-key.json"
-    )
+    credentials = get_credentials()
     return bigquery.Client(project=PROJECT_ID, credentials=credentials)
 
-
-# Loading
 def load_vectorizer():
-    credentials = service_account.Credentials.from_service_account_file(config["CREDENTIALS_PATH"])
-    storage_client = storage.Client(project=config["PROJECT_ID"], credentials=credentials)
-    bucket = storage_client.bucket(config["BUCKET_NAME"])
-    blob = bucket.blob(config["VECTORIZER_BLOB"])
+    credentials = get_credentials()
+    storage_client = storage.Client(project=PROJECT_ID, credentials=credentials)
+    bucket = storage_client.bucket(BUCKET_NAME)
+    blob = bucket.blob(VECTORIZER_BLOB)
 
     with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
         blob.download_to_filename(tmp_file.name)
@@ -40,30 +54,34 @@ def load_prospect_data():
     query = f"SELECT * FROM `{PROJECT_ID}.{DATASET_ID}.{TABLE_NAME}` WHERE mission_statement IS NOT NULL"
     return client.query(query).to_dataframe()
 
-# Preprocessing
-def get_wordnet_pos(word):
-    """Map POS tag to first character for WordNetLemmatizer"""
-    tag = pos_tag([word])[0][1][0].lower()  # Get first letter of POS tag
-    return{'n': 'n', 'v': 'v', 'a': 'a', 'r': 'r'}.get(tag, 'n')
+# # Preprocessing
+# def get_wordnet_pos(word):
+#     nltk.download('punkt')
+#     nltk.download('stopwords')
+#     nltk.download('wordnet')
+#     nltk.download('averaged_perceptron_tagger')
+#     """Map POS tag to first character for WordNetLemmatizer"""
+#     tag = pos_tag([word])[0][1][0].lower()  # Get first letter of POS tag
+#     return{'n': 'n', 'v': 'v', 'a': 'a', 'r': 'r'}.get(tag, 'n')
 
-def cleaning(sentence):
-    # Basic cleaning
-    sentence = sentence.strip().lower()
-    sentence = ''.join(char for char in sentence if not char.isdigit())
-    sentence = sentence.translate(str.maketrans('', '', string.punctuation))
+# def cleaning(sentence):
+#     # Basic cleaning
+#     sentence = sentence.strip().lower()
+#     sentence = ''.join(char for char in sentence if not char.isdigit())
+#     sentence = sentence.translate(str.maketrans('', '', string.punctuation))
 
-    # Tokenization
-    tokenized_sentence = word_tokenize(sentence)
+#     # Tokenization
+#     tokenized_sentence = word_tokenize(sentence)
 
-    # Stopwords removal
-    stop_words = set(stopwords.words('english'))
-    tokenized_sentence_cleaned = [w for w in tokenized_sentence if w not in stop_words]
+#     # Stopwords removal
+#     stop_words = set(stopwords.words('english'))
+#     tokenized_sentence_cleaned = [w for w in tokenized_sentence if w not in stop_words]
 
-    # Lemmatization with correct POS tagging
-    lemmatizer = WordNetLemmatizer()
-    lemmatized = [lemmatizer.lemmatize(word, get_wordnet_pos(word)) for word in tokenized_sentence_cleaned]
+#     # Lemmatization with correct POS tagging
+#     lemmatizer = WordNetLemmatizer()
+#     lemmatized = [lemmatizer.lemmatize(word, get_wordnet_pos(word)) for word in tokenized_sentence_cleaned]
 
-    return ' '.join(lemmatized)
+#     return ' '.join(lemmatized)
 
 # Matching
 def get_top_20_leads(freelance_vec, prospect_df):
@@ -105,10 +123,9 @@ def mail_generator(freelance, prospect, previous_mail_content=''):
 
     try:
         response = model.invoke(prompt)
-        content = response.content if hasattr(response, "content") else str(response)
+        content = response.__dict__['content']
     except Exception as e:
         print(f"Error : {e}")
         content = f"ERROR: {e}"
 
-    content = response.__dict__['content']
     return content

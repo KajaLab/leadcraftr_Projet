@@ -42,7 +42,7 @@ def match(mission_statement: str = Query(..., min_length=10)):
         vec = vectorizer.transform([mission_statement])
 
         # Vectoriser l'entrée
-        mission_statement = cleaning(mission_statement)
+        # mission_statement = cleaning(mission_statement)
         vec = vectorizer.transform([mission_statement])
         # Matching
         top_leads = get_top_20_leads(vec, prospects)
@@ -53,8 +53,8 @@ def match(mission_statement: str = Query(..., min_length=10)):
         return {"error": str(e)}
 
 
-@app.post("/mail_generator")
-async def mail_generator(request: Request):
+@app.post("/generate_mail")
+async def generate_mail_route(request: Request):
     try:
         data = await request.json()
         freelance = data.get("freelance", {})
