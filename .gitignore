@@ -26,6 +26,7 @@ raw_data/
 # Data in the package
 # Add files you want to include in the git repo using `git add -f file_name`
 data/
+nltk_data/
 
 # Saved models
 models/
