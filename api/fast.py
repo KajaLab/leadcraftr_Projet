@@ -41,28 +41,27 @@ def match(mission_statement: str = Query(..., min_length=10)):
         # Vectoriser la mission
         vec = vectorizer.transform([mission_statement])
 
+        # Vectoriser l'entrée
+        mission_statement = cleaning(mission_statement)
+        vec = vectorizer.transform([mission_statement])
         # Matching
         top_leads = get_top_20_leads(vec, prospects)
-
         # Nettoyage pour le frontend
         return top_leads.drop(columns=["tfidf_vector"]).to_dict(orient="records")
 
     except Exception as e:
         return {"error": str(e)}
 
-@app.post("/generate_mail")
-# def generate_mail(request: Request):
-#     data = request.json()
-#     freelance = data.get("freelance", {})
-#     prospect = data.get("prospect", {})
-#     return mail_generator(freelance, prospect)
 
-async def generate_mail(request: Request):
+@app.post("/mail_generator")
+async def mail_generator(request: Request):
     try:
         data = await request.json()
         freelance = data.get("freelance", {})
         prospect = data.get("prospect", {})
-        mail = mail_generator(freelance, prospect)
+        previous_mail_content = data.get("basic_mail_content", "")
+
+        mail = mail_generator(freelance, prospect, previous_mail_content)
         return JSONResponse(content={"email": mail})
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": str(e)})
