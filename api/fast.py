@@ -52,16 +52,6 @@ def match(mission_statement: str = Query(..., min_length=10)):
     except Exception as e:
         return {"error": str(e)}
 
-@app.post("/basic_mail_generator")
-async def basic_mail_generator(request: Request):
-    try:
-        data = await request.json()
-        freelance = data.get("freelance", {})
-        prospect = data.get("prospect", {})
-        mail = basic_mail_generator(freelance, prospect)
-        return JSONResponse(content={"email": mail})
-    except Exception as e:
-        return JSONResponse(status_code=500, content={"error": str(e)})
 
 @app.post("/mail_generator")
 async def mail_generator(request: Request):
@@ -69,9 +59,9 @@ async def mail_generator(request: Request):
         data = await request.json()
         freelance = data.get("freelance", {})
         prospect = data.get("prospect", {})
-        basic_mail_content = data.get("basic_mail_content", "")
+        previous_mail_content = data.get("basic_mail_content", "")
 
-        mail = mail_generator(freelance, prospect, basic_mail_content)
+        mail = mail_generator(freelance, prospect, previous_mail_content)
         return JSONResponse(content={"email": mail})
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": str(e)})
