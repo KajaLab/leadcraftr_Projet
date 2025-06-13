@@ -8,28 +8,6 @@ FROM python:3.12
 #      Slim version
 # FROM python:3.12-slim
 
-# # Install NLTK
-# RUN pip install --no-cache-dir nltk
-
-# # Create directory for NLTK data
-# ENV NLTK_DATA=nltk_data
-# RUN mkdir -p $NLTK_DATA
-
-# # Download 'punkt' to specified location
-# RUN python -m nltk.downloader -d $NLTK_DATA punkt
-
-# # Set environment variable (helps at runtime)
-# ENV NLTK_DATA=$NLTK_DATA
-
-# # Optional: Set working directory
-# WORKDIR /app
-
-# COPY . .
-
-# COPY nltk_data nltk_data
-
-# CMD ["python", "utils.py"]
-
 #      Tensorflow version (attention: won't run on Apple Silicon)
 # FROM tensorflow/tensorflow:2.16.1
 
