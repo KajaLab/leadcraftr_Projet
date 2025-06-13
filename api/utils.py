@@ -16,9 +16,8 @@ from nltk import pos_tag
 from .config import config
 import os
 import nltk
+nltk.data.path.append(os.path.abspath("nltk_data"))
 
-
-os.environ['NLTK_DATA'] = 'nltk_data'
 
 # Config
 CREDENTIALS_PATH = config["CREDENTIALS_PATH"]
@@ -54,34 +53,30 @@ def load_prospect_data():
     query = f"SELECT * FROM `{PROJECT_ID}.{DATASET_ID}.{TABLE_NAME}` WHERE mission_statement IS NOT NULL"
     return client.query(query).to_dataframe()
 
-# # Preprocessing
-# def get_wordnet_pos(word):
-#     nltk.download('punkt')
-#     nltk.download('stopwords')
-#     nltk.download('wordnet')
-#     nltk.download('averaged_perceptron_tagger')
-#     """Map POS tag to first character for WordNetLemmatizer"""
-#     tag = pos_tag([word])[0][1][0].lower()  # Get first letter of POS tag
-#     return{'n': 'n', 'v': 'v', 'a': 'a', 'r': 'r'}.get(tag, 'n')
+# Preprocessing
+def get_wordnet_pos(word):
+    """Map POS tag to first character for WordNetLemmatizer"""
+    tag = pos_tag([word])[0][1][0].lower()  # Get first letter of POS tag
+    return{'n': 'n', 'v': 'v', 'a': 'a', 'r': 'r'}.get(tag, 'n')
 
-# def cleaning(sentence):
-#     # Basic cleaning
-#     sentence = sentence.strip().lower()
-#     sentence = ''.join(char for char in sentence if not char.isdigit())
-#     sentence = sentence.translate(str.maketrans('', '', string.punctuation))
+def cleaning(sentence):
+    # Basic cleaning
+    sentence = sentence.strip().lower()
+    sentence = ''.join(char for char in sentence if not char.isdigit())
+    sentence = sentence.translate(str.maketrans('', '', string.punctuation))
 
-#     # Tokenization
-#     tokenized_sentence = word_tokenize(sentence)
+    # Tokenization
+    tokenized_sentence = word_tokenize(sentence)
 
-#     # Stopwords removal
-#     stop_words = set(stopwords.words('english'))
-#     tokenized_sentence_cleaned = [w for w in tokenized_sentence if w not in stop_words]
+    # Stopwords removal
+    stop_words = set(stopwords.words('english'))
+    tokenized_sentence_cleaned = [w for w in tokenized_sentence if w not in stop_words]
 
-#     # Lemmatization with correct POS tagging
-#     lemmatizer = WordNetLemmatizer()
-#     lemmatized = [lemmatizer.lemmatize(word, get_wordnet_pos(word)) for word in tokenized_sentence_cleaned]
+    # Lemmatization with correct POS tagging
+    lemmatizer = WordNetLemmatizer()
+    lemmatized = [lemmatizer.lemmatize(word, get_wordnet_pos(word)) for word in tokenized_sentence_cleaned]
 
-#     return ' '.join(lemmatized)
+    return ' '.join(lemmatized)
 
 # Matching
 def get_top_20_leads(freelance_vec, prospect_df):
