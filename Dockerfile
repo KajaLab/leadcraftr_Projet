@@ -24,7 +24,10 @@ COPY api api
 RUN mkdir /raw_data
 RUN mkdir /models
 
-# COPY credentials.json credentials.json
+COPY .env.yaml .env.yaml
+COPY notebooks/bigquery-sa-key.json bigquery-sa-key.json
+
+ENV ENV=CLOUD_RUN
 
 # TODO: to speed up, you can load your model from MLFlow or Google Cloud Storage at startup using
 # RUN python -c 'replace_this_with_the_commands_you_need_to_run_to_load_the_model'
