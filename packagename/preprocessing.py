@@ -72,6 +72,3 @@ freelance_df, prospect_df, vectorizer = vectorize_missions_dataset(freelance_df,
 
 print(f"✅ Data vectorized and preprocessed")
 
-# Sauvegarde des DataFrames nettoyés et vectorisés
-freelance_df.to_csv('generate_datasets/freelances_dataset.csv', index=False)
-prospect_df.to_csv('generate_datasets/prospects_dataset.csv', index=False)
