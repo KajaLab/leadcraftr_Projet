@@ -158,7 +158,7 @@ def prospect_mail_generator(prospect, freelance, previous_mail_content=''):
             - Open with a brief and relevant introduction.
             - Clearly explain why you're reaching out and what kind of collaboration you’re seeking.
             - Be business-oriented and adapted to the freelance's background.
-            - Match the freelance’s tone: {freelance['preferred_tone']}, while also reflecting your company tone: {prospect['target_tone']} and style: {prospect['preferred_style']}.
+            - Match the freelance’s tone: {freelance['preferred_tone']}, while also reflecting your company tone: {prospect['target_tone']} and style: {freelance['preferred_style']}.
             - End with a clear call to action (e.g., propose a call, ask for availability, etc.).
             - Sign the email with your name.
 
