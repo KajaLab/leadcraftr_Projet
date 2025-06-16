@@ -1,4 +1,4 @@
-nb_work_hour_per_day=7           #### interface streamlit [1-7] 7 par défaut
+nb_work_hour_per_day=7           #### interface streamlit [1-11] 7 par défaut
 nb_work_day_per_year=260        #### interface streamlit [1-365] 260 par défaut
 
 ratio_invoicable=0.65   ### interface streamlit (équalizer)
