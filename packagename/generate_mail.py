@@ -4,7 +4,7 @@ import numpy as np
 from langchain.chat_models import init_chat_model
 
 
-def mail_generator(freelance, prospect, previous_mail_content=''):
+def freelance_mail_generator(freelance, prospect, previous_mail_content=''):
     model = init_chat_model("gemini-2.0-flash", model_provider="google_genai")
     prospect = prospect.copy()
 
@@ -36,10 +36,46 @@ def mail_generator(freelance, prospect, previous_mail_content=''):
 
     try:
         response = model.invoke(prompt)
-        content = response.content if hasattr(response, "content") else str(response)
+        content = response.__dict__['content']
     except Exception as e:
         print(f"Error : {e}")
         content = f"ERROR: {e}"
 
-    content = response.__dict__['content']
+    return content
+
+def prospect_mail_generator(prospect, freelance, previous_mail_content=''):
+    model = init_chat_model("gemini-2.0-flash", model_provider="google_genai")
+    freelance = freelance.copy()
+
+    prompt = f"""
+            If there is no previous email, ignore the following instruction.
+
+            Otherwise, based on the content below, rewrite the previous email ('{previous_mail_content}') to better match the desired tone and style, while keeping its intent.
+
+            Write a clear, professional, and personalized cold email in English, addressed to {freelance['name']}, a {freelance['title']} based in {freelance['city']},
+            specialized in the {freelance['main_sector']} sector with top skills in {freelance['top3_skills']} and a daily rate of {freelance['daily_rate']} EUR (remote: {freelance['remote']}).
+
+            You are {prospect['main_contact']} ({prospect['contact_role']}) from {prospect['company']}, a {prospect['company_size']} company at the {prospect['funding_stage']} stage,
+            located in {prospect['city']} and operating in the {prospect['sector']} sector. Remote work availability: {prospect['remote']}.
+
+            Your mission is: {prospect['mission_statement']}.
+
+            The email should:
+            - Open with a brief and relevant introduction.
+            - Clearly explain why you're reaching out and what kind of collaboration you’re seeking.
+            - Be business-oriented and adapted to the freelance's background.
+            - Match the freelance’s tone: {freelance['preferred_tone']}, while also reflecting your company tone: {prospect['target_tone']} and style: {prospect['preferred_style']}.
+            - End with a clear call to action (e.g., propose a call, ask for availability, etc.).
+            - Sign the email with your name.
+
+            Ensure the language is polite, professional, and personalized. Avoid fluff and generic phrases. Return only the body of the email (no subject or explanation).
+            """
+
+    try:
+        response = model.invoke(prompt)
+        content = response.__dict__['content']
+    except Exception as e:
+        print(f"Error : {e}")
+        content = f"ERROR: {e}"
+
     return content
