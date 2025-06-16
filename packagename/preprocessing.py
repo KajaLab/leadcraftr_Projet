@@ -6,6 +6,7 @@ from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from nltk import pos_tag
 from sklearn.feature_extraction.text import TfidfVectorizer
+from scipy.sparse import csr_matrix
 
 # Ensure necessary NLTK resources are downloaded
 nltk.download('punkt')
@@ -54,10 +55,19 @@ def vectorize_missions_dataset(freelance_df, prospect_df):
     freelance_df = freelance_df.copy()
     prospect_df = prospect_df.copy()
 
-    freelance_df["tfidf_vector"] = list(vectorizer.transform(freelance_df["tfidf_vector"]))
-    prospect_df["tfidf_vector"] = list(vectorizer.transform(prospect_df["tfidf_vector"]))
-    return freelance_df, prospect_df, vectorizer
+    # Fonction de conversion
+    def sparse_vector_to_list(sparse_row):
+        return sparse_row.toarray().flatten().tolist()
 
+    # Vectorisation
+    freelance_vectors = vectorizer.transform(freelance_df["tfidf_vector"])
+    prospect_vectors = vectorizer.transform(prospect_df["tfidf_vector"])
+
+    # Transformation en liste
+    freelance_df["tfidf_vector"] = [sparse_vector_to_list(row) for row in freelance_vectors]
+    prospect_df["tfidf_vector"] = [sparse_vector_to_list(row) for row in prospect_vectors]
+
+    return freelance_df, prospect_df, vectorizer
 
 # Ouvre les csv
 freelance_df = pd.read_csv('generate_datasets/freelances_dataset.csv', index_col='freelance_id').reset_index(drop=True)
@@ -70,5 +80,7 @@ prospect_df['tfidf_vector'] = prospect_df['mission_statement'].apply(cleaning)
 # Vectorise les datas
 freelance_df, prospect_df, vectorizer = vectorize_missions_dataset(freelance_df, prospect_df)
 
-print(f"✅ Data vectorized and preprocessed")
+freelance_df.to_csv('generate_datasets/freelances_dataset.csv', index=False)
+prospect_df.to_csv('generate_datasets/prospects_dataset.csv', index=False)
 
+print(f"✅ Data vectorized and preprocessed")
