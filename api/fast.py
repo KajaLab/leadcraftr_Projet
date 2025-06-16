@@ -102,7 +102,7 @@ async def generate_mail_prospect(request: Request):
         prospect = data.get("prospect", {})
         previous_mail_content = data.get("basic_mail_content", "")
 
-        mail = prospect_mail_generator(freelance, prospect, previous_mail_content)
+        mail = prospect_mail_generator(prospect, freelance, previous_mail_content)
         return JSONResponse(content={"email": mail})
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": str(e)})
