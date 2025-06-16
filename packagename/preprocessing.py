@@ -70,8 +70,8 @@ def vectorize_missions_dataset(freelance_df, prospect_df):
     return freelance_df, prospect_df, vectorizer
 
 # Ouvre les csv
-freelance_df = pd.read_csv('generate_datasets/freelances_dataset.csv', index_col='freelance_id').reset_index(drop=True)
-prospect_df = pd.read_csv('generate_datasets/prospects_dataset.csv', index_col='prospect_id').reset_index(drop=True)
+freelance_df = pd.read_csv('generate_datasets/freelances_dataset.csv')
+prospect_df = pd.read_csv('generate_datasets/prospects_dataset.csv')
 
 # Clean les datas
 freelance_df['tfidf_vector'] = freelance_df['mission_statement'].apply(cleaning)
