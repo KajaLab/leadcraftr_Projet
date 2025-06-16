@@ -22,7 +22,8 @@ nltk.data.path.append(os.path.abspath("nltk_data"))
 # Config
 CREDENTIALS_PATH = config["CREDENTIALS_PATH"]
 PROJECT_ID = config["PROJECT_ID"]
-DATASET_ID = config["DATASET_ID"]
+DATASET_PROSPECT_ID = config["DATASET_PROSPECT_ID"]
+DATASET_FREELANCE_ID = config["DATASET_FREELANCE_ID"]
 TABLE_NAME_PROSPECT = config["TABLE_NAME_PROSPECT"]
 TABLE_NAME_FREELANCE = config["TABLE_NAME_FREELANCE"]
 BUCKET_NAME = config["BUCKET_NAME"]
@@ -51,12 +52,12 @@ def load_vectorizer():
 
 def load_prospect_data():
     client = get_bq_client()
-    query = f"SELECT * FROM `{PROJECT_ID}.{DATASET_ID}.{TABLE_NAME_PROSPECT}` WHERE mission_statement IS NOT NULL"
+    query = f"SELECT * FROM `{PROJECT_ID}.{DATASET_PROSPECT_ID}.{TABLE_NAME_PROSPECT}` WHERE mission_statement IS NOT NULL"
     return client.query(query).to_dataframe()
 
 def load_freelance_data():
     client = get_bq_client()
-    query = f"SELECT * FROM `{PROJECT_ID}.{DATASET_ID}.{TABLE_NAME_FREELANCE}` WHERE mission_statement IS NOT NULL"
+    query = f"SELECT * FROM `{PROJECT_ID}.{DATASET_FREELANCE_ID}.{TABLE_NAME_FREELANCE}` WHERE mission_statement IS NOT NULL"
     return client.query(query).to_dataframe()
 
 # Preprocessing
