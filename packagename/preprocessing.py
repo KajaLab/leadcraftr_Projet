@@ -36,5 +36,4 @@ def cleaning(sentence):
     return ' '.join(lemmatized)
 
 
-text = "Reimagining digital presence: we help mid-size empower user interaction with customer engagement and elegant design."
-print(cleaning(text))
+
