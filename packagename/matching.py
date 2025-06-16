@@ -1,34 +1,6 @@
 # Imports
-import pandas as pd
-import numpy as np
-from packagename.preprocessing import cleaning
-from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from scipy.sparse import vstack
-
-
-def vectorize_missions_dataset(freelance_df, prospect_df):
-    """
-    Vectorise les mission statements avec TF-IDF et stocke les vecteurs dans la colonne 'tfidf_vector'.
-    """
-    # Copie des textes bruts
-    all_missions = pd.concat([
-        freelance_df["TfidfVect"],
-        prospect_df["TfidfVect"]
-    ])
-
-    vectorizer = TfidfVectorizer(stop_words='english')
-    vectorizer.fit(all_missions)
-
-    # Ajoute les vecteurs TF-IDF dans une nouvelle colonne
-    freelance_df = freelance_df.copy()
-    prospect_df = prospect_df.copy()
-
-    freelance_df["tfidf_vector"] = list(vectorizer.transform(freelance_df["TfidfVect"]))
-    prospect_df["tfidf_vector"] = list(vectorizer.transform(prospect_df["TfidfVect"]))
-    return freelance_df, prospect_df, vectorizer
-
-
 
 def get_top_20_leads(freelance_vec, prospect_df):
     """
