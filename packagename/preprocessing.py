@@ -1,6 +1,7 @@
 import string
 import nltk
 import pandas as pd
+import json
 from nltk.stem import WordNetLemmatizer
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
@@ -60,12 +61,16 @@ def vectorize_missions_dataset(freelance_df, prospect_df):
         return sparse_row.toarray().flatten().tolist()
 
     # Vectorisation
-    freelance_vectors = vectorizer.transform(freelance_df["tfidf_vector"])
-    prospect_vectors = vectorizer.transform(prospect_df["tfidf_vector"])
+    freelance_vectors = vectorizer.transform(freelance_df["tfidf_vector"].fillna(""))
+    prospect_vectors = vectorizer.transform(prospect_df["tfidf_vector"].fillna(""))
 
-    # Transformation en liste
-    freelance_df["tfidf_vector"] = [sparse_vector_to_list(row) for row in freelance_vectors]
-    prospect_df["tfidf_vector"] = [sparse_vector_to_list(row) for row in prospect_vectors]
+    # # Transformation en liste
+    # freelance_df["tfidf_vector"] = [sparse_vector_to_list(row) for row in freelance_vectors]
+    # prospect_df["tfidf_vector"] = [sparse_vector_to_list(row) for row in prospect_vectors]
+
+    # :flèche_bas: SAUVEGARDE EN FORMAT LISTE → STRING JSON (compatible BigQuery)
+    freelance_df["tfidf_vector"] = [json.dumps(vec.tolist()) for vec in freelance_vectors.toarray()]
+    prospect_df["tfidf_vector"] = [json.dumps(vec.tolist()) for vec in prospect_vectors.toarray()]
 
     return freelance_df, prospect_df, vectorizer
 
@@ -76,6 +81,7 @@ prospect_df = pd.read_csv('generate_datasets/prospects_dataset.csv')
 # Clean les datas
 freelance_df['tfidf_vector'] = freelance_df['mission_statement'].apply(cleaning)
 prospect_df['tfidf_vector'] = prospect_df['mission_statement'].apply(cleaning)
+
 
 # Vectorise les datas
 freelance_df, prospect_df, vectorizer = vectorize_missions_dataset(freelance_df, prospect_df)
