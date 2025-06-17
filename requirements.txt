@@ -58,6 +58,7 @@ pyyaml
 # API
 fastapi
 uvicorn
+pydantic==2.9.2
 
 numpy<2.0.0
 pandas==2.2.3
