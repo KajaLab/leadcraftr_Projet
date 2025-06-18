@@ -45,7 +45,7 @@ def match_freelance(mission_statement: str = Query(..., min_length=10)):
         # mission_statement = cleaning(mission_statement)
         vec = vectorizer.transform([mission_statement])
         # Matching
-        top_leads = get_top_20_prospects(vec, prospects)
+        top_leads = get_top_10_prospects(vec, prospects)
         # Nettoyage pour le frontend
         return top_leads.drop(columns=["tfidf_vector"]).to_dict(orient="records")
 
@@ -87,7 +87,7 @@ def match_prospect(mission_statement: str = Query(..., min_length=10)):
         # mission_statement = cleaning(mission_statement)
         vec = vectorizer.transform([mission_statement])
         # Matching
-        top_leads = get_top_20_freelances(vec, freelances)
+        top_leads = get_top_10_freelances(vec, freelances)
         # Nettoyage pour le frontend
         return top_leads.drop(columns=["tfidf_vector"]).to_dict(orient="records")
 
