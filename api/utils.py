@@ -85,17 +85,17 @@ def cleaning(sentence):
     return ' '.join(lemmatized)
 
 # Matching
-def get_top_20_prospects(freelance_vec, prospect_df):
+def get_top_10_prospects(freelance_vec, prospect_df):
     prospect_matrix = vstack([v for v in prospect_df["tfidf_vector"]])
     similarities = cosine_similarity(freelance_vec, prospect_matrix).flatten()
-    top_20_idx = similarities.argsort()[-20:][::-1]
-    return prospect_df.iloc[top_20_idx].assign(similarity=similarities[top_20_idx])
+    top_10_idx = similarities.argsort()[-10:][::-1]
+    return prospect_df.iloc[top_10_idx].assign(similarity=similarities[top_10_idx])
 
-def get_top_20_freelances(prospect_vec, freelance_df):
+def get_top_10_freelances(prospect_vec, freelance_df):
     freelance_matrix = vstack([v for v in freelance_df["tfidf_vector"]])
     similarities = cosine_similarity(prospect_vec, freelance_matrix).flatten()
-    top_20_idx = similarities.argsort()[-20:][::-1]
-    return freelance_df.iloc[top_20_idx].assign(similarity=similarities[top_20_idx])
+    top_10_idx = similarities.argsort()[-10:][::-1]
+    return freelance_df.iloc[top_10_idx].assign(similarity=similarities[top_10_idx])
 
 # Mail
 def freelance_mail_generator(freelance, prospect, previous_mail_content=''):
